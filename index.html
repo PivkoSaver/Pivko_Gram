@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Messenger</title>
+</head>
+<body>
+    <h1>Welcome to My Messenger</h1>
+    <form id="chatForm">
+        <input id="messageInput" autocomplete="off" /><button>Send</button>
+    </form>
+    <ul id="messages"></ul>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const form = document.getElementById('chatForm');
+        const input = document.getElementById('messageInput');
+        const messages = document.getElementById('messages');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (input.value) {
+                socket.emit('chat message', input.value);
+                input.value = '';
+            }
+        });
+
+        socket.on('chat message', function(msg) {
+            const item = document.createElement('li');
+            item.textContent = msg;
+            messages.appendChild(item);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+    </script>
+</body>
+</html>
