@@ -1,36 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
+<html>
+  <head>
     <title>My Messenger</title>
-</head>
-<body>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 30px;
+      }
+      #login {
+        margin-bottom: 20px;
+      }
+      #messages {
+        list-style: none;
+        padding: 0;
+      }
+      #messages li {
+        padding: 5px 10px;
+        border-bottom: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
     <h1>Welcome to My Messenger</h1>
-    <form id="chatForm">
-        <input id="messageInput" autocomplete="off" /><button>Send</button>
-    </form>
-    <ul id="messages"></ul>
+
+    <div id="login">
+      <input type="text" id="username" placeholder="Enter your nickname" />
+      <button onclick="login()">Enter</button>
+    </div>
+
+    <div id="chat" style="display: none;">
+      <input id="message" placeholder="Type your message..." />
+      <button onclick="sendMessage()">Send</button>
+      <ul id="messages"></ul>
+    </div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        const socket = io();
-        const form = document.getElementById('chatForm');
-        const input = document.getElementById('messageInput');
-        const messages = document.getElementById('messages');
+      const socket = io();
+      let nickname = "";
 
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (input.value) {
-                socket.emit('chat message', input.value);
-                input.value = '';
-            }
-        });
+      function login() {
+        const input = document.getElementById("username");
+        if (input.value.trim() !== "") {
+          nickname = input.value.trim();
+          document.getElementById("login").style.display = "none";
+          document.getElementById("chat").style.display = "block";
+        }
+      }
 
-        socket.on('chat message', function(msg) {
-            const item = document.createElement('li');
-            item.textContent = msg;
-            messages.appendChild(item);
-            window.scrollTo(0, document.body.scrollHeight);
-        });
+      function sendMessage() {
+        const input = document.getElementById("message");
+        const message = input.value.trim();
+        if (message !== "") {
+          socket.emit("chat message", { name: nickname, text: message });
+          input.value = "";
+        }
+      }
+
+      socket.on("chat message", (msg) => {
+        const item = document.createElement("li");
+        item.textContent = `${msg.name}: ${msg.text}`;
+        document.getElementById("messages").appendChild(item);
+      });
     </script>
-</body>
+  </body>
 </html>
